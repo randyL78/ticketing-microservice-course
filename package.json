@@ -1,5 +1,6 @@
 {
-  "dependencies": {
-    "update": "^0.7.4"
+  "name": "ticketing",
+  "scripts": {
+    "watch": "tsc -w --project auth/tsconfig.json"
   }
 }
