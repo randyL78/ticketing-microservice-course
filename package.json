@@ -1,0 +1,6 @@
+{
+  "name": "ticketing",
+  "scripts": {
+    "watch": "tsc -w --project auth/tsconfig.json"
+  }
+}
