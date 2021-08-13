@@ -3,8 +3,8 @@ import { CustomResponseError } from "./custom-response-error";
 export class NotFoundError extends CustomResponseError {
   statusCode = 404;
 
-  constructor() {
-    super("Route not found");
+  constructor(url: String) {
+    super(`Route: ${url} not found`);
 
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }
