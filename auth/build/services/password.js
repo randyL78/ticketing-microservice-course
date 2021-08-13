@@ -35,48 +35,43 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var express_validator_1 = require("express-validator");
-var bad_request_error_1 = require("../errors/bad-request-error");
-var request_validation_error_1 = require("../errors/request-validation-error");
-var user_1 = require("../models/user");
-var router = express_1.default.Router();
-exports.signupRouter = router;
-router.post('/api/users/signup', [
-    express_validator_1.body('email')
-        .isEmail()
-        .withMessage('Email must be valid'),
-    express_validator_1.body('password')
-        .trim()
-        .isLength({ min: 4, max: 20 })
-        .withMessage('Password must be between 4 and 20 characters')
-], function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, email, password, existingUser, user;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    throw new request_validation_error_1.RequestValidationError(errors.array());
+var crypto_1 = require("crypto");
+var util_1 = require("util");
+var scryptAsync = util_1.promisify(crypto_1.scrypt);
+var Password = /** @class */ (function () {
+    function Password() {
+    }
+    Password.toHash = function (password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var salt, buf;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        salt = crypto_1.randomBytes(8).toString('hex');
+                        return [4 /*yield*/, scryptAsync(password, salt, 64)];
+                    case 1:
+                        buf = (_a.sent());
+                        return [2 /*return*/, buf.toString('hex') + "." + salt];
                 }
-                _a = req.body, email = _a.email, password = _a.password;
-                return [4 /*yield*/, user_1.User.findOne({ email: email })];
-            case 1:
-                existingUser = _b.sent();
-                if (existingUser) {
-                    throw new bad_request_error_1.BadRequestError("Email " + email + " already in use");
+            });
+        });
+    };
+    Password.compare = function (storedPassword, suppliedPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, hashedPassword, salt, buf;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = storedPassword.split('.'), hashedPassword = _a[0], salt = _a[1];
+                        return [4 /*yield*/, scryptAsync(suppliedPassword, salt, 64)];
+                    case 1:
+                        buf = (_b.sent());
+                        return [2 /*return*/, hashedPassword === buf.toString('hex')];
                 }
-                user = user_1.User.build({ email: email, password: password });
-                return [4 /*yield*/, user.save()];
-            case 2:
-                _b.sent();
-                console.log("User: " + user + " created");
-                res.status(201).send(user);
-                return [2 /*return*/];
-        }
-    });
-}); });
+            });
+        });
+    };
+    return Password;
+}());
+exports.Password = Password;

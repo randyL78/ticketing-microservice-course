@@ -32,6 +32,7 @@ async (req: Request, res: Response) => {
     const user = User.build({ email, password });
     await user.save();
 
+    console.log(`User: ${user} created`)
     res.status(201).send(user);
 });
 
