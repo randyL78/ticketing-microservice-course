@@ -40,51 +40,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var express_validator_1 = require("express-validator");
-var bad_request_error_1 = require("../errors/bad-request-error");
-var validate_request_1 = require("../middlewares/validate-request");
-var user_1 = require("../models/user");
-var password_1 = require("../services/password");
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var router = express_1.default.Router();
-exports.signinRouter = router;
-router.post('/api/users/signin', [
-    express_validator_1.body('email')
-        .isEmail()
-        .withMessage('Email must be valid.'),
-    express_validator_1.body('password')
-        .trim()
-        .notEmpty()
-        .withMessage('Password must not be empty')
-], validate_request_1.validateRequest, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, password, existingUser, passwordsMatch, userJwt;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _a = req.body, email = _a.email, password = _a.password;
-                return [4 /*yield*/, user_1.User.findOne({ email: email })];
-            case 1:
-                existingUser = _b.sent();
-                if (!existingUser) {
-                    throw new bad_request_error_1.BadRequestError("Invalid credentials");
-                }
-                return [4 /*yield*/, password_1.Password.compare(existingUser.password, password)];
-            case 2:
-                passwordsMatch = _b.sent();
-                if (!passwordsMatch) {
-                    throw new bad_request_error_1.BadRequestError("Invalid credentials");
-                }
-                userJwt = jsonwebtoken_1.default.sign({
-                    id: existingUser.id,
-                    email: existingUser.email
-                }, process.env.JWT_KEY);
-                // Store JWT in a session
-                req.session = {
-                    jwt: userJwt
-                };
-                console.log("User " + existingUser + " signend in");
-                res.status(200).send('User authenticated');
-                return [2 /*return*/];
-        }
+require("express-async-errors");
+var body_parser_1 = require("body-parser");
+var cookie_session_1 = __importDefault(require("cookie-session"));
+// Router files
+var current_user_1 = require("./routes/current-user");
+var signin_1 = require("./routes/signin");
+var signout_1 = require("./routes/signout");
+var signup_1 = require("./routes/signup");
+var error_handler_1 = require("./middlewares/error-handler");
+var not_found_error_1 = require("./errors/not-found-error");
+var app = express_1.default();
+exports.app = app;
+app.set('trust proxy', true);
+app.use(body_parser_1.json());
+app.use(cookie_session_1.default({
+    signed: false,
+    secure: true
+}));
+// Router handling
+app.use(current_user_1.currentUserRouter);
+app.use(signin_1.signinRouter);
+app.use(signout_1.signoutRouter);
+app.use(signup_1.signupRouter);
+app.all('*', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        throw new not_found_error_1.NotFoundError(req.url);
     });
 }); });
+app.use(error_handler_1.errorHandler);

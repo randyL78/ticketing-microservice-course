@@ -41,28 +41,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var express_validator_1 = require("express-validator");
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var bad_request_error_1 = require("../errors/bad-request-error");
-var request_validation_error_1 = require("../errors/request-validation-error");
+var validate_request_1 = require("../middlewares/validate-request");
 var user_1 = require("../models/user");
 var router = express_1.default.Router();
 exports.signupRouter = router;
 router.post('/api/users/signup', [
     express_validator_1.body('email')
         .isEmail()
-        .withMessage('Email must be valid'),
+        .withMessage('Email must be valid.'),
     express_validator_1.body('password')
         .trim()
         .isLength({ min: 4, max: 20 })
         .withMessage('Password must be between 4 and 20 characters')
-], function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, email, password, existingUser, user;
+], validate_request_1.validateRequest, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, existingUser, user, userJwt;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    throw new request_validation_error_1.RequestValidationError(errors.array());
-                }
                 _a = req.body, email = _a.email, password = _a.password;
                 return [4 /*yield*/, user_1.User.findOne({ email: email })];
             case 1:
@@ -71,11 +68,21 @@ router.post('/api/users/signup', [
                     throw new bad_request_error_1.BadRequestError("Email " + email + " already in use");
                 }
                 user = user_1.User.build({ email: email, password: password });
-                return [4 /*yield*/, user.save()];
+                return [4 /*yield*/, user.save()
+                    // Generate JSON Web Token
+                ];
             case 2:
                 _b.sent();
+                userJwt = jsonwebtoken_1.default.sign({
+                    id: user.id,
+                    email: user.email
+                }, process.env.JWT_KEY);
+                // Store JWT in a session
+                req.session = {
+                    jwt: userJwt
+                };
                 console.log("User: " + user + " created");
-                res.status(201).send(user);
+                res.status(201).send({ id: user._id, email: user.email });
                 return [2 /*return*/];
         }
     });
