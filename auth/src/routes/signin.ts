@@ -46,7 +46,6 @@ router.post(
       jwt: userJwt
     }
 
-    console.log(`User ${existingUser} signend in`);
     res.status(200).send('User authenticated');
   }
 )

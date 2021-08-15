@@ -82,7 +82,6 @@ router.post('/api/users/signin', [
                 req.session = {
                     jwt: userJwt
                 };
-                console.log("User " + existingUser + " signend in");
                 res.status(200).send('User authenticated');
                 return [2 /*return*/];
         }

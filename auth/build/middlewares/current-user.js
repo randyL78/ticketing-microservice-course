@@ -7,7 +7,6 @@ var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.currentUser = function (req, res, next) {
     var _a;
     if (!((_a = req.session) === null || _a === void 0 ? void 0 : _a.jwt)) {
-        console.info("Ip failed to send JWT");
         return next();
     }
     try {
@@ -15,7 +14,6 @@ exports.currentUser = function (req, res, next) {
         req.currentUser = payload;
     }
     catch (err) {
-        console.error("Ip failed to invalid JWT");
     }
     next();
 };
