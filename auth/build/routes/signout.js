@@ -7,5 +7,6 @@ var express_1 = __importDefault(require("express"));
 var router = express_1.default.Router();
 exports.signoutRouter = router;
 router.post('/api/users/signout', function (req, res) {
-    res.send("Well hello there.");
+    req.session = null;
+    res.send({});
 });

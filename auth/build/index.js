@@ -39,51 +39,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-require("express-async-errors");
-var body_parser_1 = require("body-parser");
 var mongoose_1 = __importDefault(require("mongoose"));
-// Router files
-var current_user_js_1 = require("./routes/current-user.js");
-var signin_js_1 = require("./routes/signin.js");
-var signout_js_1 = require("./routes/signout.js");
-var signup_1 = require("./routes/signup");
-var error_handler_js_1 = require("./middlewares/error-handler.js");
-var not_found_error_js_1 = require("./errors/not-found-error.js");
-var app = express_1.default();
-app.use(body_parser_1.json());
-// Router handling
-app.use(current_user_js_1.currentUserRouter);
-app.use(signin_js_1.signinRouter);
-app.use(signout_js_1.signoutRouter);
-app.use(signup_1.signupRouter);
-app.all('*', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        throw new not_found_error_js_1.NotFoundError(req.url);
-    });
-}); });
-app.use(error_handler_js_1.errorHandler);
+var app_1 = require("./app");
 var start = function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, mongoose_1.default.connect("mongodb://auth-mongo-srv:27017/auth", {
+                if (!process.env.JWT_KEY) {
+                    throw new Error('JWT_KEY must be defined');
+                }
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, mongoose_1.default.connect('mongodb://auth-mongo-srv:27017/auth', {
                         useNewUrlParser: true,
                         useUnifiedTopology: true,
                         useCreateIndex: true
                     })];
-            case 1:
-                _a.sent();
-                console.log("Connected to MongoDB");
-                return [3 /*break*/, 3];
             case 2:
+                _a.sent();
+                console.log('Connected to MongoDB');
+                return [3 /*break*/, 4];
+            case 3:
                 err_1 = _a.sent();
                 console.error(err_1);
-                return [3 /*break*/, 3];
-            case 3:
-                app.listen(3000, function () {
+                return [3 /*break*/, 4];
+            case 4:
+                app_1.app.listen(3000, function () {
                     console.log('Listening on port 3000!');
                 });
                 return [2 /*return*/];
