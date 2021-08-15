@@ -39,33 +39,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-require("express-async-errors");
-var body_parser_1 = require("body-parser");
-var cookie_session_1 = __importDefault(require("cookie-session"));
-// Router files
-var current_user_1 = require("./routes/current-user");
-var signin_1 = require("./routes/signin");
-var signout_1 = require("./routes/signout");
-var signup_1 = require("./routes/signup");
-var error_handler_1 = require("./middlewares/error-handler");
-var not_found_error_1 = require("./errors/not-found-error");
-var app = express_1.default();
-exports.app = app;
-app.set('trust proxy', true);
-app.use(body_parser_1.json());
-app.use(cookie_session_1.default({
-    signed: false,
-    secure: process.env.NODE_ENV !== 'test'
-}));
-// Router handling
-app.use(current_user_1.currentUserRouter);
-app.use(signin_1.signinRouter);
-app.use(signout_1.signoutRouter);
-app.use(signup_1.signupRouter);
-app.all('*', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var supertest_1 = __importDefault(require("supertest"));
+var app_1 = require("../../app");
+it('clears the cookie after signing out', function () { return __awaiter(void 0, void 0, void 0, function () {
+    var response;
     return __generator(this, function (_a) {
-        throw new not_found_error_1.NotFoundError(req.url);
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, supertest_1.default(app_1.app)
+                    .post('/api/users/signup')
+                    .send({
+                    email: 'test@test.com',
+                    password: 'password'
+                })
+                    .expect(201)];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, supertest_1.default(app_1.app)
+                        .post('/api/users/signout')
+                        .send({})
+                        .expect(200)];
+            case 2:
+                response = _a.sent();
+                expect(response.get('Set-Cookie')[0]).toEqual('express:sess=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly');
+                return [2 /*return*/];
+        }
     });
 }); });
-app.use(error_handler_1.errorHandler);

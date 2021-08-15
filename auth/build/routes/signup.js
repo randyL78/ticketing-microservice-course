@@ -81,7 +81,6 @@ router.post('/api/users/signup', [
                 req.session = {
                     jwt: userJwt
                 };
-                console.log("User: " + user + " created");
                 res.status(201).send({ id: user._id, email: user.email });
                 return [2 /*return*/];
         }

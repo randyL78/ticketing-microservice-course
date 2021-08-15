@@ -20,7 +20,6 @@ export const currentUser = (
   next: NextFunction
 ) => {
   if (!req.session?.jwt) {
-    console.info(`Ip failed to send JWT`)
     return next()
   }
 
@@ -31,7 +30,6 @@ export const currentUser = (
     ) as UserPayload
     req.currentUser = payload
   } catch (err) {
-    console.error(`Ip failed to invalid JWT`)
   }
 
   next()
